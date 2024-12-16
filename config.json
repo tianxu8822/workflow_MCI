@@ -1,0 +1,12 @@
+{
+    "seed":                     10,
+    "cnn": {
+        "fil_num":              32,
+        "drop_rate":            0.15,
+        "batch_size":           4,
+        "balanced":             1,
+        "data_dir":             "../data/example/",
+        "learning_rate":        0.0001,
+        "train_epochs":         300
+    }
+}
