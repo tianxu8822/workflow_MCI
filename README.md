@@ -1,9 +1,22 @@
-This program can perform CN and MCI classification.
 
-Before executing this program, you need to prepare the data.
+本工作流主要对data文件夹下的多模态生物医学数据进行轻度认知障碍诊断，通过受试者的磁共振影像数据、基因表达数据和单核苷酸多态性数据区分正常人和轻度认知障碍患者。模型读取图像进行推理给出诊断结果和患病概率，结果保存在result表格中。
+所训练模型在ADNI数据上包含的24例样本进行测试，ACC达到了85%。在我们的开发环境中，将批次大小设为4的情况下，分析一个受试者的数据大约耗时3s。
 
-    1) The data to be prepared contains a list of subjects and their specific gene expression, SNP and MRI data (Specific gene and sites information can be found in the "example" data.). 
-    2) The list of subjects should be written in "name.csv" in the format, where "name" is the name of your data. 
-    3) Accordingly, the "data" folder should contain a folder named "name", which should contain "ge.csv", "snp.csv" and a folder named "MRI". The format of these data should be the same as "example".
+1、开发环境：
 
-Then, you can execute "python main.py" to use this program, it will generate a result file named "result.csv" in the program folder.
+硬件开发环境：
+处理器：Intel(R) Xeon(R) Gold 6230 CPU @ 2.10GHz
+内存：251GB
+硬盘：15.7TB HDD
+显卡：NVIDIA GeForce GTX 2080 Ti
+软件开发环境：
+Python：3.7
+Pytorch：1.7.1
+
+2、使用流程：
+
+在执行此程序之前，您需要准备数据，在data/exmple目录下有示例的数据文件。
+1） 要准备的数据包含受试者及其特定基因表达、SNP和MRI数据的列表（特定基因和位点信息可以在“示例”数据中找到）。
+2） 主题列表应以“name.csv”格式书写，其中“name”是您的数据名称。
+3） 相应地，“data”文件夹应包含一个名为“name”的文件夹，其中应包含“ge.csv”、“snp.csv”和一个名称为“MRI”的文件夹。这些数据的格式应与“示例”相同。
+然后，您可以执行“python main.py”来使用此程序，它将在程序文件夹中生成一个名为“result.csv”的结果文件。
