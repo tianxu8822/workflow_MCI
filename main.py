@@ -10,11 +10,22 @@ torch.backends.benchmark = True
 
 
 def cnn_main(gpu_index_tmp):
-    path = os.getcwd()[:-len(os.getcwd().split('/')[-1])]
+    path = os.getcwd().replace('\\', '/')
+    # print(path)
+
+    # path = path[:-len(path.split('/')[-1])]
+    path = path + '/'
+    # print(111, path, os.getcwd())
+
     names = []
+    if 'result.csv' in os.listdir(path):
+        os.remove('{}result.csv'.format(path))
+    # exit()
     for file_ in os.listdir(path):
         if file_.endswith('.csv'):
             names.append(file_[:-4])
+    # print(path, names)
+    # exit()
     with torch.cuda.device(gpu_index_tmp):
         for name in names:
             cnn_setting = config['cnn']
@@ -49,7 +60,7 @@ if __name__ == "__main__":
     old_path = os.getcwd()
     os.chdir(sys.path[0])
 
-    gpus = [1]
+    gpus = [0]
 
     # to perform CNN training #####################################
     config = read_json('./config.json')

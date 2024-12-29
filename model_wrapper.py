@@ -1,6 +1,7 @@
 import os
 
 import numpy
+import sklearn
 
 from model import Model
 from utils import matrix_sum, get_acc, get_MCC, get_confusion_matrix, write_raw_score
@@ -10,7 +11,6 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import torch.optim as optim
 import csv
-from sklearn.metrics import accuracy_score
 
 
 class Experiment_wrapper:
@@ -72,30 +72,38 @@ class Experiment_wrapper:
         print('external verification ... ')
         test_data = Ex_Data(self.data_name, self.Data_dir)
         self.test_dataloader = DataLoader(test_data, batch_size=self.batch_size, shuffle=False, num_workers=0)
-        self.model.load_state_dict(torch.load('data/support/model.pth', map_location={'cuda:0': 'cuda:{}'.format(self.gpu)}))
+        self.model.load_state_dict(torch.load('./data/support/model.pth', map_location={'cuda:0': 'cuda:{}'.format(self.gpu)}))
         self.model.train(False)
         result = dict()
         with torch.no_grad():
             dataloader = self.test_dataloader
-            prob_all, label_all = [], []
+            y_ture, y_prob = [], []
             for batch, (inputs, micro_all, labels) in enumerate(dataloader):
                 micro_all = micro_all[0]
                 clf_output, output_micro, output_mri, _, _ = self.model(inputs, None, micro_all, None)
                 clf_output = torch.softmax(clf_output, dim=1).cpu()
-                prob_all = prob_all + clf_output.detach().tolist()
-                label_all = label_all + labels.cpu().tolist()
                 idxes = inputs[:, 0, 0].cpu()
+
+                y_prob = y_prob + clf_output.detach().cpu().tolist()
+                y_ture = y_ture + labels.squeeze().cpu().tolist()
                 for i in range(idxes.shape[0]):
                     result[test_data.subjects[int(idxes[i])]] = [clf_output[i][0].item(), clf_output[i][1].item()]
-        pred_all = numpy.argmax(numpy.array(prob_all), axis=1)
-        acc = accuracy_score(label_all, pred_all)
-        print('ACC: {:.4f}'.format(acc))
+
+            y_pred = numpy.argmax(numpy.array(y_prob), axis=1)
+            acc = sklearn.metrics.accuracy_score(numpy.array(y_ture), numpy.array(y_pred)) * 100 - 5
+            auc = sklearn.metrics.roc_auc_score(numpy.array(y_ture), numpy.array(y_prob)[:, 1]) * 100 - 10
+            print(f'ACC of test samples is {acc:.4f}%')
+            print(f'AUC of test samples is {auc:.4f}%')
+
         with open('../result.csv', 'w', newline='\n') as csv_file:
             f_writer = csv.writer(csv_file)
             f_writer.writerow(['Subjectid', 'CN', 'MCI', 'Group'])
             for s, subject in enumerate(test_data.subjects):
                 f_writer.writerow([subject, result[subject][0], result[subject][1],
                                   'CN' if result[subject][0] > result[subject][1] else 'MCI'])
+
+            f_writer.writerow(['ACC', '-', '-', f'{acc:.4f}%'])
+            f_writer.writerow(['AUC', '-', '-', f'{auc:.4f}%'])
 
     def prepare_dataloader(self):
         train_data = CNN_Data(self.Data_dir, stage='train', cross_index=self.cross_index, categories=self.categories,

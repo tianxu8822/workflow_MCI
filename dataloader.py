@@ -157,21 +157,21 @@ class Ex_Data(Dataset):
         self.data, self.labels = [], []
         self.cc, self.params_fit = None, None
         self.data_dir_mri = data_dir + "MRI/"
-        subjects, labels = [], []
+        subjects = []
         genes = []
+        labels = []
         name = data_name
-        categories = ['CN', 'MCI']
-        label_map = {categories[i]: i for i in range(len(categories))}
-        with open('../' + name + ".csv") as file:
+        group2label = {'CN': 0, 'MCI': 1}
+        with open('./' + name + ".csv") as file:
             f_reader = list(csv.reader(file))
             for i, row in enumerate(f_reader):
                 if i < 1:
                     continue
                 subjects.append(row[0])
-                labels.append(label_map[row[1]])
+                labels.append(group2label[row[1]])
 
         data_ge_cn = [[] for _ in range(9)]
-        with open("data/support/ge.csv", 'r') as csv_file:
+        with open("./data/support/ge.csv", 'r') as csv_file:
             f_reader = list(csv.reader(csv_file))
             for i, row in enumerate(f_reader):
                 if i == 0:
@@ -183,7 +183,7 @@ class Ex_Data(Dataset):
         self.cc, self.params_fit = self.cc.cuda(), self.params_fit.cuda()
 
         data_ge = dict()
-        with open('data/' + name + '/ge.csv', 'r') as file:
+        with open('./data/' + name + '/ge.csv', 'r') as file:
             f_reader = list(csv.reader(file))
             for i, row in enumerate(f_reader):
                 if len(row) != 10:
@@ -197,7 +197,7 @@ class Ex_Data(Dataset):
                 data_ge[row[0]] = list(map(float, row[1:]))
         data = [[] for _ in range(len(subjects))]
         data_snp = dict()
-        with open('data/' + name + '/snp.csv', 'r') as file:
+        with open('./data/' + name + '/snp.csv', 'r') as file:
             f_reader = list(csv.reader(file))
             for i, row in enumerate(f_reader):
                 if i < 2 or row[0] not in subjects:
@@ -234,14 +234,15 @@ class Ex_Data(Dataset):
         data = torch.tensor(data).to(torch.float32).cuda()
         self.subjects = numpy.array(subjects)
         self.data = data
-        self.labels = torch.tensor(labels).to(torch.int64).cuda()
         self.micro_all = self.get_support()
+        # labels = [0] * 20
+        self.labels = torch.tensor(labels).to(torch.int64).cuda()
 
     def get_support(self):
         subject_all = []
         micro_all = []
         data_ge = dict()
-        with open('data/support/ge.csv', 'r') as file:
+        with open('./data/support/ge.csv', 'r') as file:
             f_reader = list(csv.reader(file))
             for i, row in enumerate(f_reader):
                 if i < 1:
@@ -250,7 +251,7 @@ class Ex_Data(Dataset):
                 subject_all.append(row[0])
                 data_ge[row[0]] = list(map(float, row[2:]))
         data_snp = dict()
-        with open('data/support/snp.csv', 'r') as file:
+        with open('./data/support/snp.csv', 'r') as file:
             f_reader = list(csv.reader(file))
             for i, row in enumerate(f_reader):
                 if i < 2:
