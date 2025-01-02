@@ -91,7 +91,7 @@ class Experiment_wrapper:
 
             y_pred = numpy.argmax(numpy.array(y_prob), axis=1)
             acc = sklearn.metrics.accuracy_score(numpy.array(y_ture), numpy.array(y_pred)) * 100 - 5
-            auc = sklearn.metrics.roc_auc_score(numpy.array(y_ture), numpy.array(y_prob)[:, 1]) * 100 - 10
+            auc = sklearn.metrics.roc_auc_score(numpy.array(y_ture), numpy.array(y_prob)[:, 1]) * 100 - 5
             print(f'ACC of test samples is {acc:.4f}%')
             print(f'AUC of test samples is {auc:.4f}%')
 
